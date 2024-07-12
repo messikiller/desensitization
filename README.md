@@ -1,4 +1,27 @@
-# desensitization
+# Leoboy Desensitization - A powerful desensitization tool for PHP
+
+A powerfull data desensitization tool, with various desensitization rules.
+
+## Features
+
+- Support multiple desensitization rules: mask, replace, hash, etc.
+- Support customized Guards, SecurityPolicy and Rule.
+- Support array desensitization by path or explicit key.
+- Supports single value desensitization.
+- Support integrations with Laravel.
+
+## Requirements
+
+- PHP >= 8.0
+- Composer for installation
+
+## Qucik Start
+
+### Installation
+
+```bash
+composer require "leoboy/desensitization"
+```
 
 ```php
 

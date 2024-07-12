@@ -2,6 +2,7 @@
     "name": "leoboy/desensitization",
     "description": "a security policy based data desensitization tool, with various transformation rules.",
     "license": "MIT",
+    "keywords": ["desensitization", "desensitize", "sensitive"],
     "autoload": {
         "psr-4": {
             "Leoboy\\Desensitization\\": "src/"
@@ -17,5 +18,8 @@
         "phpunit/phpunit": "^11.2",
         "phpstan/phpstan": "^1.11",
         "laravel/pint": "^1.16"
+    },
+    "require": {
+        "php": ">=8.0"
     }
 }
