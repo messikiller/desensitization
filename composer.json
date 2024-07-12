@@ -1,0 +1,21 @@
+{
+    "name": "leoboy/desensitization",
+    "description": "a security policy based data desensitization tool, with various transformation rules.",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Leoboy\\Desensitization\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "messikiller",
+            "email": "messikiller@aliyun.com"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^11.2",
+        "phpstan/phpstan": "^1.11",
+        "laravel/pint": "^1.16"
+    }
+}
