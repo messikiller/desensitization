@@ -6,12 +6,24 @@ use Leoboy\Desensitization\Contracts\RuleContract;
 
 class Mask implements RuleContract
 {
+    /**
+     * mask asterisk.
+     */
     protected string $aterisk = '*';
 
+    /**
+     * mask aterisk repeat times.
+     */
     protected int $repeatTimes = 3;
 
+    /**
+     * left padding length.
+     */
     protected int $paddingLeft = 1;
 
+    /**
+     * right padding length.
+     */
     protected int $paddingRight = 1;
 
     public function transform($input)

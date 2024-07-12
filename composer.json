@@ -20,6 +20,7 @@
         "laravel/pint": "^1.16"
     },
     "require": {
-        "php": ">=8.0"
+        "php": ">=8.0",
+        "illuminate/hashing": "^11.15"
     }
 }
