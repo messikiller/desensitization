@@ -5,6 +5,8 @@ namespace Leoboy\Desensitization\Rules;
 use Illuminate\Contracts\Hashing\Hasher as HasherContract;
 use Illuminate\Hashing\BcryptHasher;
 use Leoboy\Desensitization\Contracts\RuleContract;
+use Leoboy\Desensitization\Exceptions\TransformException;
+use Throwable;
 
 class Hash implements RuleContract
 {
@@ -20,6 +22,9 @@ class Hash implements RuleContract
         $this->use($hasher);
     }
 
+    /**
+     * which hasher driver to use
+     */
     public function use(HasherContract $hasher): self
     {
         $this->hasher = $hasher;
@@ -27,6 +32,9 @@ class Hash implements RuleContract
         return $this;
     }
 
+    /**
+     * set hasher options
+     */
     public function options(array $options): self
     {
         $this->options = $options;
@@ -36,6 +44,10 @@ class Hash implements RuleContract
 
     public function transform($input)
     {
-        return $this->hasher->make($input, $this->options);
+        try {
+            return $this->hasher->make($input, $this->options);
+        } catch (Throwable $th) {
+            throw new TransformException($th->getMessage());
+        }
     }
 }

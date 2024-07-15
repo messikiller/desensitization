@@ -8,10 +8,13 @@ use Leoboy\Desensitization\Contracts\RuleContract;
 use Leoboy\Desensitization\Contracts\SecurityPolicyContract;
 use Leoboy\Desensitization\Contracts\TransformerContract;
 use Leoboy\Desensitization\Exceptions\DesensitizationException;
+use Leoboy\Desensitization\Exceptions\TransformException;
 use Throwable;
 
 class Desensitizer
 {
+    private static self $instance;
+
     /**
      * security guard
      */
@@ -23,7 +26,7 @@ class Desensitizer
     protected bool $guarded = false;
 
     /**
-     * configuration for desensitization
+     * default configuration for desensitization
      */
     protected array $config = [
         'wildcardChar' => '*',
@@ -39,6 +42,28 @@ class Desensitizer
             $this->via($guard);
         }
         $this->config = array_merge($this->config, $config);
+    }
+
+    /**
+     * get global instance
+     */
+    public static function global(): self
+    {
+        if (is_null(self::$instance)) {
+            self::$instance = new self(...func_get_args());
+        }
+
+        return self::$instance;
+    }
+
+    /**
+     * make current object as global
+     */
+    public function globalize(): self
+    {
+        self::$instance = $this;
+
+        return self::$instance;
     }
 
     /**
@@ -84,7 +109,13 @@ class Desensitizer
     {
         $dotArray = Helper::arrayDot($data, $this->config['keyDot']);
         $dotKeys = array_keys($dotArray);
+        $attributes = [];
+
         foreach ($definitions as $key => $type) {
+            if (is_int($key)) {
+                $key = $type;
+                $type = '__TYPE__';
+            }
             $dataKeys = $this->extractMatchedDataKeys($key, $dotKeys);
             $attribute = Factory::attribute($key, $type, $dataKeys);
             if (! $this->guarded && ! ($attribute instanceof TransformerContract)) {
@@ -125,7 +156,7 @@ class Desensitizer
             if ($this->config['skipTransformationException']) {
                 return $value;
             }
-            throw $th;
+            throw new TransformException('Data transformation failed, value: '.var_export($value, true));
         }
     }
 
@@ -180,7 +211,7 @@ class Desensitizer
                     if ($this->config['skipTransformationException']) {
                         continue;
                     }
-                    throw $th;
+                    throw new TransformException('Attribute transformation failed, value: '.var_export($attribute, true));
                 }
                 Helper::arraySet($data, $key, $transformed);
             }

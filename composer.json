@@ -21,6 +21,17 @@
     },
     "require": {
         "php": ">=8.0",
-        "illuminate/hashing": "^11.15"
+        "illuminate/hashing": "^11.15",
+        "illuminate/support": "^11.15"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Leoboy\\Desensitization\\Laravel\\DesensitizationServiceProvider"
+            ],
+            "aliases": {
+                "Desensitizer": "Leoboy\\Desensitization\\Laravel\\Facades\\Desensitizer"
+            }
+        }
     }
 }
