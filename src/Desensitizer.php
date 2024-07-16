@@ -9,6 +9,7 @@ use Leoboy\Desensitization\Contracts\SecurityPolicyContract;
 use Leoboy\Desensitization\Contracts\TransformerContract;
 use Leoboy\Desensitization\Exceptions\DesensitizationException;
 use Leoboy\Desensitization\Exceptions\TransformException;
+use ReflectionClass;
 use Throwable;
 
 class Desensitizer
@@ -24,6 +25,17 @@ class Desensitizer
      * whether sef::$guard was set
      */
     protected bool $guarded = false;
+
+    /**
+     * registered rules list: short => rule
+     */
+    protected array $shortRules = [
+        'cut' => \Leoboy\Desensitization\Rules\Cut::class,
+        'hash' => \Leoboy\Desensitization\Rules\Hash::class,
+        'mask' => \Leoboy\Desensitization\Rules\Mask::class,
+        'none' => \Leoboy\Desensitization\Rules\None::class,
+        'replace' => \Leoboy\Desensitization\Rules\Replace::class,
+    ];
 
     /**
      * default configuration for desensitization
@@ -47,7 +59,7 @@ class Desensitizer
     /**
      * get global instance
      */
-    public static function global(): self
+    public static function global(): static
     {
         if (is_null(self::$instance)) {
             self::$instance = new self(...func_get_args());
@@ -59,7 +71,7 @@ class Desensitizer
     /**
      * make current object as global
      */
-    public function globalize(): self
+    public function globalize(): static
     {
         self::$instance = $this;
 
@@ -96,6 +108,55 @@ class Desensitizer
     }
 
     /**
+     * register short rule
+     */
+    public function registerShort(string $ruleClass, string $short, bool $override = false): static
+    {
+        if (! class_exists($ruleClass)) {
+            throw new DesensitizationException('The registering rule is not existed: '.$ruleClass);
+        }
+        $reflector = new ReflectionClass($ruleClass);
+        if (! $reflector->implementsInterface(RuleContract::class)) {
+            throw new DesensitizationException('The registering rule must implement RuleContract: '.$ruleClass);
+        }
+        if (! $reflector->isInstantiable()) {
+            throw new DesensitizationException('The registering rule must be instantiable: '.$ruleClass);
+        }
+        if (! $override && isset($this->shortRules[$short])) {
+            throw new DesensitizationException('The short name has already registered: '.$short);
+        }
+        $this->shortRules[$short] = $ruleClass;
+
+        return $this;
+    }
+
+    /**
+     * parse the rule from short definition
+     */
+    public function parse(string $definition): RuleContract
+    {
+        [$nameParams, $methodParams] = str_contains($definition, '|')
+            ? explode('|', $definition, 2)
+            : [$definition, ''];
+        [$ruleName, $creationParams] = str_contains($nameParams, ':')
+            ? explode(':', $nameParams, 2)
+            : [$nameParams, ''];
+        if (! isset($this->shortRules[$ruleName])) {
+            throw new DesensitizationException('The rule is not registered: '.$ruleName);
+        }
+        $ruleClass = $this->shortRules[$ruleName];
+        $rule = new $ruleClass(...explode(',', $creationParams));
+        foreach (explode('|', $methodParams) as $methodParam) {
+            [$methodName, $params] = explode(':', $methodParam);
+            if (method_exists($rule, $methodName)) {
+                $rule->{$methodName}(...explode(',', $params));
+            }
+        }
+
+        return $rule;
+    }
+
+    /**
      * data desensitization method
      *
      * definitions EXAMPLE:
@@ -113,8 +174,14 @@ class Desensitizer
 
         foreach ($definitions as $key => $type) {
             if (is_int($key)) {
-                $key = $type;
-                $type = '__TYPE__';
+                [$key, $type] = [$type, '__TYPE__'];
+            }
+            if (is_string($type)) {
+                try {
+                    $type = $this->parse($type);
+                } catch (DesensitizationException $e) {
+                    // skip
+                }
             }
             $dataKeys = $this->extractMatchedDataKeys($key, $dotKeys);
             $attribute = Factory::attribute($key, $type, $dataKeys);
@@ -128,7 +195,7 @@ class Desensitizer
     }
 
     /**
-     * applu desensitization to standalone value
+     * apply desensitization to standalone value
      *
      * Usage:
      *
@@ -139,7 +206,7 @@ class Desensitizer
      * 3. transform value with global guard or rule or callback:
      *      (new Desensitizer())->via($guardOrRule)->invoke($input, email');
      */
-    public function invoke(mixed $value, string|RuleContract|callable $type): mixed
+    public function invoke(mixed $value, string|RuleContract|callable $type = ''): mixed
     {
         if (! $this->guarded && is_string($type)) {
             throw new DesensitizationException('Guard is required unless attribute is callable or rule');
@@ -156,7 +223,7 @@ class Desensitizer
             if ($this->config['skipTransformationException']) {
                 return $value;
             }
-            throw new TransformException('Data transformation failed, value: '.var_export($value, true));
+            throw new TransformException($th->getMessage().'Data transformation failed, value: '.var_export($value, true));
         }
     }
 
@@ -199,7 +266,7 @@ class Desensitizer
         foreach ($attributes as $attribute) {
             $guardedRule = $this->guarded ? $securityPolicy->decide($attribute) : null;
             foreach ($attribute->getDataKeys() as $key) {
-                $original = Helper::arrayGet($data, $key);
+                $original = Helper::arrayGet($data, $key, null, $this->config['keyDot']);
                 try {
                     $transformed = match (true) {
                         ($attribute instanceof TransformerContract) => $attribute->transform($original),
@@ -213,7 +280,14 @@ class Desensitizer
                     }
                     throw new TransformException('Attribute transformation failed, value: '.var_export($attribute, true));
                 }
-                Helper::arraySet($data, $key, $transformed);
+                Helper::arraySet(
+                    $data,
+                    $key,
+                    $transformed,
+                    true,
+                    $this->config['keyDot'],
+                    $this->config['wildcardChar']
+                );
             }
         }
 

@@ -5,7 +5,7 @@ namespace Leoboy\Desensitization\Rules;
 use Closure;
 use Leoboy\Desensitization\Contracts\RuleContract;
 
-class Invoke implements RuleContract
+class Invoke extends AbstractRule implements RuleContract
 {
     protected Closure $callback;
 

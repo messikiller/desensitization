@@ -6,9 +6,9 @@ A powerful PHP data desensitization tool with built-in rich desensitization calc
 
 ## Features
 
-- Rich built-in desensitization calculation rules: masking, encryption, truncation, replacement, etc.
+- Rich built-in desensitization calculation rules: `mask`, `hash`, `cut`, `replace`, etc.
 
-- Supports complex dynamic authorization desensitization through custom Guards, SecurityPolicies, and Rules.
+- Supports complex dynamic authorization desensitization through custom `Guard`, `SecurityPolicy`, and `Rule`.
 
 - Supports matching and desensitizing key-value pairs at different levels of multi-dimensional arrays.
 
@@ -29,7 +29,7 @@ A powerful PHP data desensitization tool with built-in rich desensitization calc
 composer require "leoboy/desensitization"
 ```
 
-### 使用
+### Usage
 
 - Initialization:
 
@@ -63,6 +63,8 @@ $data = [
 
 $desensitizer->invoke('abc123', fn ($str) => strrev($str)); // 321cba
 $desensitizer->invoke('123456', (new Mask())->padding(2)->use(*)->repeat(3)); // 12***56
+$desensitizer->invoke('123456', 'mask|use:x|repeat:3|padding:4'); // 12***56
+$desensitizer->invoke('123456', 'replace:xxxx'); // 12***56
 
 // Multi-dimensional array
 $desensitizer->desensitize($data, [

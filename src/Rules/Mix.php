@@ -5,7 +5,7 @@ namespace Leoboy\Desensitization\Rules;
 use Leoboy\Desensitization\Contracts\RuleContract;
 use Leoboy\Desensitization\Exceptions\InvalidRuleException;
 
-class Mix implements RuleContract
+class Mix extends AbstractRule implements RuleContract
 {
     /**
      * bound rules list
@@ -22,6 +22,16 @@ class Mix implements RuleContract
             }
         }
         $this->rules = $rules;
+    }
+
+    /**
+     * append a rule to the rules list
+     */
+    public function append(RuleContract $rule): self
+    {
+        $this->rules[] = $rule;
+
+        return $this;
     }
 
     public function transform($input)

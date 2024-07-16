@@ -4,7 +4,7 @@ namespace Leoboy\Desensitization\Rules;
 
 use Leoboy\Desensitization\Contracts\RuleContract;
 
-class Cut implements RuleContract
+class Cut extends AbstractRule implements RuleContract
 {
     protected int $from = 0;
 
@@ -32,6 +32,8 @@ class Cut implements RuleContract
 
     public function transform($input)
     {
+        $this->assertLikeString($input);
+
         return mb_substr($input, $this->from, $this->length);
     }
 }

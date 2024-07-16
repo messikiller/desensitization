@@ -4,7 +4,7 @@ namespace Leoboy\Desensitization\Rules;
 
 use Leoboy\Desensitization\Contracts\RuleContract;
 
-class Mask implements RuleContract
+class Mask extends AbstractRule implements RuleContract
 {
     /**
      * mask asterisk.
@@ -28,11 +28,13 @@ class Mask implements RuleContract
 
     public function transform($input)
     {
+        $this->assertLikeString($input);
+
         $len = mb_strlen($input);
         $left = $this->paddingLeft;
         $right = $this->paddingRight;
 
-        if ($len <= $left + $right) {
+        if ($len < ($left + $right)) {
             return str_repeat($this->aterisk, $this->repeatTimes);
         }
 

@@ -8,7 +8,7 @@ use Leoboy\Desensitization\Contracts\RuleContract;
 use Leoboy\Desensitization\Exceptions\TransformException;
 use Throwable;
 
-class Hash implements RuleContract
+class Hash extends AbstractRule implements RuleContract
 {
     protected HasherContract $hasher;
 
@@ -44,6 +44,7 @@ class Hash implements RuleContract
 
     public function transform($input)
     {
+        $this->assertLikeString($input);
         try {
             return $this->hasher->make($input, $this->options);
         } catch (Throwable $th) {
