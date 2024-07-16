@@ -147,6 +147,30 @@ it has the same effect as:
 Mask::create()->use('x')->repeat(3)->padding(4)
 ```
 
+currently, avaiable short names:
+
+```php
+[
+    'cut' => \Leoboy\Desensitization\Rules\Cut::class,
+    'hash' => \Leoboy\Desensitization\Rules\Hash::class,
+    'mask' => \Leoboy\Desensitization\Rules\Mask::class,
+    'none' => \Leoboy\Desensitization\Rules\None::class,
+    'replace' => \Leoboy\Desensitization\Rules\Replace::class,
+]
+```
+
+if you want to add a new customized rule and its short name, you can use:
+
+```php
+$desensitizer->register(\App\Rules\CustomRule::class, 'custom-rule');
+```
+
+if you want to overide a built-in rule, you can use (it may cause some unpredictable problems):
+
+```php
+$desensitizer->register(\App\Rules\CustomMaskRule::class, 'mask', true);
+```
+
 ### GuardContract
 
 The guard is used to obtain the security policy. In common scenarios, the guard can be a user model or a custom class, but both need to implement the interface: `\Leoboy\Desensitization\Contracts\GuardContract`
@@ -198,4 +222,14 @@ Built-in security policies include:
 - `Leoboy\Desensitization\SecurityPolicy\UnlimitedSecurityPolicy`: This security policy always returns the: `Leoboy\Desensitization\Rule\None` rule object, which does not modify the data and returns the input field values as they are.
 - `Leoboy\Desensitization\SecurityPolicy\RuleFixedSecurityPolicy`This security policy returns a fixed rule object.
 
+## License
+
+Desenseitization is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
 With this powerful tool, you can flexibly define and apply desensitization rules based on your specific needs and security policies.
+
+## Contact with me
+
+if you have any questions, you can issue a question.
+
+:heart: ENJOY IT!
