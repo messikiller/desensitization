@@ -116,7 +116,7 @@ class Desensitizer
     /**
      * register short rule
      */
-    public function registerShort(string $ruleClass, string $short, bool $override = false): static
+    public function register(string $ruleClass, string $short, bool $override = false): static
     {
         if (! class_exists($ruleClass)) {
             throw new DesensitizationException('The registering rule is not existed: '.$ruleClass);
@@ -153,7 +153,9 @@ class Desensitizer
         $ruleClass = $this->shortRules[$ruleName];
         $rule = new $ruleClass(...explode(',', $creationParams));
         foreach (explode('|', $methodParams) as $methodParam) {
-            [$methodName, $params] = explode(':', $methodParam);
+            [$methodName, $params] = str_contains($methodParam, ':')
+                ? explode(':', $methodParam)
+                : [$methodParam, ''];
             if (method_exists($rule, $methodName)) {
                 $rule->{$methodName}(...explode(',', $params));
             }

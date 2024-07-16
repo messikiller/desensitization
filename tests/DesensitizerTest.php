@@ -7,6 +7,7 @@ use Leoboy\Desensitization\Exceptions\DesensitizationException;
 use Leoboy\Desensitization\Helper;
 use Leoboy\Desensitization\Rules\Mask;
 use Leoboy\Desensitization\Rules\Replace;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
@@ -166,5 +167,33 @@ final class DesensitizerTest extends TestCase
                 ],
             ],
         ], $desensitized);
+    }
+
+    #[DataProvider('parseDataProvider')]
+    public function testParse($definition, $expectedClass, $input, $expectedOutput): void
+    {
+        $desensitizer = new Desensitizer();
+        $testMaskRule = $desensitizer->parse($definition);
+        $this->assertInstanceOf($expectedClass, $testMaskRule);
+        $this->assertSame(
+            $expectedOutput,
+            $desensitizer->invoke($input, $testMaskRule)
+        );
+    }
+
+    public function testParseFailureException(): void
+    {
+        $this->expectException(DesensitizationException::class);
+        $desensitizer = new Desensitizer();
+        $desensitizer->parse('invalid');
+    }
+
+    public static function parseDataProvider(): array
+    {
+        return [
+            ['mask|use:$|repeat:4|padding:1', Mask::class, 'lionelmessi', 'l$$$$i'],
+            ['replace:x', Replace::class, 'ronaldo', 'x'],
+            ['replace:x|use:*', Replace::class, 'ronaldo', '*'],
+        ];
     }
 }

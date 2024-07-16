@@ -1,19 +1,15 @@
 # Leoboy Desensitization - A Powerful PHP Data Desensitization Tool
 
-[中文说明](README_zh.md)
-
 A powerful PHP data desensitization tool with built-in rich desensitization calculation rules: masking, encryption, truncation, replacement, and more. It also supports dynamic authorization desensitization based on security policies.
+
+<p align="center"><img src="logo.svg" width="90%" alt="Logo Leoboy Desensitization"></p>
 
 ## Features
 
 - Rich built-in desensitization calculation rules: `mask`, `hash`, `cut`, `replace`, etc.
-
 - Supports complex dynamic authorization desensitization through custom `Guard`, `SecurityPolicy`, and `Rule`.
-
 - Supports matching and desensitizing key-value pairs at different levels of multi-dimensional arrays.
-
 - Supports desensitizing single input values.
-
 - Supports integration into the Laravel framework.
 
 ## Environment
@@ -36,18 +32,21 @@ composer require "leoboy/desensitization"
 ```php
 use Leoboy\Desensitization\Desensitizer;
 
-//Instantiate a regular desensitizer
+// Instantiate a regular desensitizer
 $localDesensitizer = new Desensitizer();
-//Create a global singleton object
+
+// Create or get a global singleton object
 $globalDesensitizer = Desensitizer::global();
-//Make the local object a global desensitizer object
+
+// Make the local object a global desensitizer object
 $localDesensitizer->globalize();
 ```
 
 - Applying Desensitization Rules:
 
 ```php
-use Leoboy\Desensitization\Rule\Mask;
+use Leoboy\Desensitization\Desensitizer;
+use Leoboy\Desensitization\Rules\Mask;
 use App\Rules\CustomRule;
 
 $data = [
@@ -61,16 +60,20 @@ $data = [
     ]
 ];
 
+$desensitizer = new Desensitizer();
+
 $desensitizer->invoke('abc123', fn ($str) => strrev($str)); // 321cba
 $desensitizer->invoke('123456', (new Mask())->padding(2)->use(*)->repeat(3)); // 12***56
-$desensitizer->invoke('123456', 'mask|use:x|repeat:3|padding:4'); // 12***56
-$desensitizer->invoke('123456', 'replace:xxxx'); // 12***56
+$desensitizer->invoke('123456', 'mask|use:x|repeat:3|padding:1'); // 1xxx6
+
+$desensitizer = new Desensitizer();
 
 // Multi-dimensional array
 $desensitizer->desensitize($data, [
-    'foo' => (new Mask())->padding(2)->use(*)->repeat(3),
-    'bar.baz' => fn ($str) => strrev($str),
-    'bar.jax.*' => new CustomRule(),
+    'foo' => Mask::create()->padding(2)->use(*)->repeat(3),
+    'bar' => new CustomRule(),
+    'baz.*' => fn ($str) => strrev($str),
+    'qux.*.fred' => 'mask|use:x|repeat:3|padding:4'
 ]);
 ```
 
@@ -83,10 +86,11 @@ use  Leoboy\Desensitization\Facades\Desensitization;
 
 Desensitization::global()->via(fn ($str) => strrev($str))->desensitize('abc123'); // 321cba
 
+// return a local desensitizer object unless call global method
 Desensitization::via(new Mask())->transform($data, [
     'foo' => new CustomRule(),
     'bar' => fn ($str) => strrev($str),
-    'jax'
+    'jax' => 'mask|use:x|repeat:3|padding:4'
 ]);
 ```
 
@@ -100,6 +104,7 @@ $desensitizer->via(new User())->transform($data, [
     'foo' => 'email',
     'bar.*' => 'password',
     'baz.jax' => 'phone'
+    'frud.*'
 ])
 ```
 
@@ -129,6 +134,18 @@ Currently, the package includes the following built-in rules:
 -  `Leoboy\Desensitization\Rules\Invoke`：Executes a specified `callable` definition: `(new Invoke(fn ($str) => strrev($str)))`
 - `Leoboy\Desensitization\Rules\Hash`：Encryption rule, allowing you to specify a Hasher driver and hash parameters. The Hasher driver passed into the constructor or `use` method should implement the interface:` Illuminate\Contracts\Hashing\Hasher`. The default encryption algorithm is the Bcrypt driver: `(new Hash())->use(new Illuminate\Hashing\BcryptHasher())->options(['cost' => 10])`
 - `Leoboy\Desensitization\Rules\Mix`，Executes multiple rules, with the list of rules passed into the constructor: `(new Mix([new Replace('*'), new Mask()]))`
+
+Rules can also use by short name:
+
+```
+mask|use:x|repeat:3|padding:4
+```
+
+it has the same effect as:
+
+```php
+Mask::create()->use('x')->repeat(3)->padding(4)
+```
 
 ### GuardContract
 
@@ -165,12 +182,12 @@ class CustomHighLevelSecurityPolicy implements SecurityPolicyContract
     public function decide(AttributeContract $attribute): RuleContract|callable
     {
         return match ($attribute->getType()) {
-            'email' => new Replace('-'),
+            'email' => 'replace:*',
             'username' => new CustomRule(),
             'password' => function ($username) {
                 return md5($username . mt_rand(100, 999));
             },
-            default => (new Mask())->use('*')->repeat(3)->padding(2)
+            default => Mask::create()->use('*')->repeat(3)->padding(2)
         };
     }
 }
