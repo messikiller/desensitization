@@ -12,6 +12,7 @@ abstract class AbstractRule implements RuleContract
      */
     public static function create(): static
     {
+        /** @phpstan-ignore new.static */
         return new static(...func_get_args());
     }
 
@@ -46,7 +47,7 @@ abstract class AbstractRule implements RuleContract
      */
     protected function assertLikeString($input)
     {
-        return $this->assertTransformableType($input, ['string', 'integer', 'double']);
+        $this->assertTransformableType($input, ['string', 'integer', 'double']);
     }
 
     /**

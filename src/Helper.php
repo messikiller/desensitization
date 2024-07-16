@@ -63,7 +63,6 @@ final class Helper
      * @param  bool  $overwrite
      * @param  string  $divider
      * @param  string  $wildcardChar
-     * @return string
      */
     public static function arraySet(
         &$target,

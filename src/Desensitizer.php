@@ -14,7 +14,12 @@ use Throwable;
 
 class Desensitizer
 {
-    private static self $instance;
+    /**
+     * global instance
+     *
+     * @var static
+     */
+    protected static $instance;
 
     /**
      * security guard
@@ -61,11 +66,12 @@ class Desensitizer
      */
     public static function global(): static
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self(...func_get_args());
+        if (is_null(static::$instance)) {
+            /** @phpstan-ignore new.static */
+            static::$instance = new static(...func_get_args());
         }
 
-        return self::$instance;
+        return static::$instance;
     }
 
     /**

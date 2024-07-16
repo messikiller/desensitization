@@ -2,6 +2,8 @@
 
 namespace Leoboy\Desensitization\Contracts;
 
+use Exception;
+
 interface GuardContract
 {
     /**
