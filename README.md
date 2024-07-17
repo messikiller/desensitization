@@ -114,7 +114,7 @@ In practical application scenarios, it is often necessary to perform different d
 
 ```php
 $desensitizer = new Desensitizer();
-$desensitizer->via(new User())->transform($data, [
+$desensitizer->via(new User())->desensitize($data, [
     'foo' => 'email',
     'bar.*' => 'password',
     'baz.jax' => 'phone'
