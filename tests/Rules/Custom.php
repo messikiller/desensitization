@@ -15,6 +15,7 @@ class Custom extends AbstractRule implements RuleContract
         if (is_null(self::$handler)) {
             return $input;
         }
+
         return (self::$handler)($input);
     }
 }
