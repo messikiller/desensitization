@@ -184,15 +184,15 @@ class Desensitizer
         $attributes = [];
 
         foreach ($definitions as $key => $type) {
-            if (is_int($key)) {
-                [$key, $type] = [$type, '__TYPE__'];
-            }
-            if (is_string($type)) {
+            if (is_string($key) && is_string($type)) {
                 try {
                     $type = $this->parse($type);
                 } catch (DesensitizationException $e) {
                     // skip
                 }
+            }
+            if (is_int($key)) {
+                [$key, $type] = [$type, '__TYPE__'];
             }
             $dataKeys = $this->extractMatchedDataKeys($key, $dotKeys);
             $attribute = Factory::attribute($key, $type, $dataKeys);
@@ -241,7 +241,11 @@ class Desensitizer
             if ($this->config['skipTransformationException']) {
                 return $value;
             }
-            throw new TransformException($th->getMessage().'Data transformation failed, value: '.var_export($value, true));
+            throw new TransformException(sprintf(
+                'Orignal Message: %s, Data transformation failed, value: %s',
+                $th->getMessage(),
+                var_export($value, true)
+            ));
         }
     }
 

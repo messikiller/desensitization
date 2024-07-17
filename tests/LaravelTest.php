@@ -1,5 +1,7 @@
 <?php
 
+namespace Leoboy\Desensitization\Tests;
+
 use Leoboy\Desensitization\Desensitizer;
 use Leoboy\Desensitization\Laravel\Facades\Desensitization;
 use Orchestra\Testbench\TestCase;

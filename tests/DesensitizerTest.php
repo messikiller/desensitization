@@ -2,6 +2,9 @@
 
 namespace Leoboy\Desensitization\Tests;
 
+use Leoboy\Desensitization\Contracts\GuardContract;
+use Leoboy\Desensitization\Contracts\RuleContract;
+use Leoboy\Desensitization\Contracts\SecurityPolicyContract;
 use Leoboy\Desensitization\Desensitizer;
 use Leoboy\Desensitization\Exceptions\DesensitizationException;
 use Leoboy\Desensitization\Helper;
@@ -214,5 +217,44 @@ final class DesensitizerTest extends TestCase
         $local->via('mask|use:*|repeat:2|padding:2')->globalize();
         $this->assertSame(Desensitizer::global(), $local);
         $this->assertSame('Cr**do', Desensitizer::global()->invoke('CristianoRonaldo'));
+    }
+
+    public function testVia(): void
+    {
+        $desensitizer = new Desensitizer();
+
+        $testRule = $this->createStub(RuleContract::class);
+        $testRule->method('transform')->willReturn('transformed');
+
+        $testPolicy = $this->createStub(SecurityPolicyContract::class);
+        $testPolicy->method('decide')->willReturn($testRule);
+
+        $testGuard = $this->createStub(GuardContract::class);
+        $testGuard->method('getSecurityPolicy')->willReturn($testPolicy);
+
+        $desensitizer->via($testGuard);
+        $this->assertSame('transformed', $desensitizer->invoke('TestInput'));
+
+        $testRule2 = $this->createStub(RuleContract::class);
+        $testRule2->method('transform')->willReturn('xyz');
+        $desensitizer->via($testRule2);
+        $this->assertSame('xyz', $desensitizer->invoke('TestInput'));
+
+        $testPolicy2 = $this->createStub(SecurityPolicyContract::class);
+        $testPolicy2->method('decide')->willReturn($testRule2);
+        $desensitizer->via($testPolicy2);
+        $this->assertSame('xyz', $desensitizer->invoke('TestInput'));
+
+        $desensitizer->via(fn ($input) => strrev($input));
+        $this->assertSame('tupnItseT', $desensitizer->invoke('TestInput'));
+    }
+
+    public function testRegister(): void
+    {
+        \Leoboy\Desensitization\Tests\Rules\Custom::$handler = fn ($input) => strrev($input);
+
+        $desensitizer = new Desensitizer();
+        $desensitizer->register(\Leoboy\Desensitization\Tests\Rules\Custom::class, 'custom');
+        $this->assertSame('tupnItseT', $desensitizer->invoke('TestInput', 'custom'));
     }
 }

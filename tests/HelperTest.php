@@ -1,5 +1,7 @@
 <?php
 
+namespace Leoboy\Desensitization\Tests;
+
 use Leoboy\Desensitization\Helper;
 use PHPUnit\Framework\TestCase;
 

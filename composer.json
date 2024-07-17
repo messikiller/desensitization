@@ -9,7 +9,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "Leoboy\\Desensitization\\": "src/"
+            "Leoboy\\Desensitization\\": "src/",
+            "Leoboy\\Desensitization\\Tests\\": "tests/"
         }
     },
     "authors": [

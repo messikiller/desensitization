@@ -1,5 +1,7 @@
 <?php
 
+namespace Leoboy\Desensitization\Tests;
+
 use Leoboy\Desensitization\Attributes\GenericAttribute;
 use Leoboy\Desensitization\Attributes\InvokableAttribute;
 use Leoboy\Desensitization\Factory;
