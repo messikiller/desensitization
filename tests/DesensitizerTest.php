@@ -58,6 +58,10 @@ final class DesensitizerTest extends TestCase
             'xyz',
             $desensitizer->via(new Replace('xyz'))->invoke('lionel messi')
         );
+        $this->assertSame(
+            'Li###si',
+            $desensitizer->invoke('LionelMessi', 'mask|use:#|repeat:3|padding:2')
+        );
     }
 
     public function testInvokeUnguardedException(): void
@@ -195,5 +199,20 @@ final class DesensitizerTest extends TestCase
             ['replace:x', Replace::class, 'ronaldo', 'x'],
             ['replace:x|use:*', Replace::class, 'ronaldo', '*'],
         ];
+    }
+
+    public function testGlobal(): void
+    {
+        $global = Desensitizer::global()->via('mask|use:$|repeat:3|padding:1');
+        $this->assertSame($global, Desensitizer::global());
+        $this->assertSame('l$$$i', Desensitizer::global()->invoke('lionelmessi'));
+    }
+
+    public function testGlobalize(): void
+    {
+        $local = new Desensitizer();
+        $local->via('mask|use:*|repeat:2|padding:2')->globalize();
+        $this->assertSame(Desensitizer::global(), $local);
+        $this->assertSame('Cr**do', Desensitizer::global()->invoke('CristianoRonaldo'));
     }
 }

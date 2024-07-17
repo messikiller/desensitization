@@ -2,7 +2,7 @@
 
 namespace Leoboy\Desensitization\Laravel;
 
-use Illuminate\Contracts\Console\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 use Leoboy\Desensitization\Desensitizer;

@@ -53,7 +53,7 @@ class Desensitizer
 
     public function __construct(
         array $config = [],
-        GuardContract|RuleContract|SecurityPolicyContract|callable|null $guard = null
+        string|GuardContract|RuleContract|SecurityPolicyContract|callable|null $guard = null
     ) {
         if (! is_null($guard)) {
             $this->via($guard);
@@ -87,9 +87,12 @@ class Desensitizer
     /**
      * set global security guard
      */
-    public function via(GuardContract|RuleContract|SecurityPolicyContract|callable $guard): self
+    public function via(string|GuardContract|RuleContract|SecurityPolicyContract|callable $definition): self
     {
-        $this->guard = Factory::guard($guard);
+        if (is_string($definition)) {
+            $definition = $this->parse($definition);
+        }
+        $this->guard = Factory::guard($definition);
         $this->guarded = true;
 
         return $this;
@@ -216,6 +219,13 @@ class Desensitizer
      */
     public function invoke(mixed $value, string|RuleContract|callable $type = ''): mixed
     {
+        if (is_string($type) && ! empty($type)) {
+            try {
+                $type = $this->parse($type);
+            } catch (DesensitizationException $e) {
+                // skip
+            }
+        }
         if (! $this->guarded && is_string($type)) {
             throw new DesensitizationException('Guard is required unless attribute is callable or rule');
         }

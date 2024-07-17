@@ -8,10 +8,10 @@ use Leoboy\Desensitization\Desensitizer;
 /**
  * Facade for desensitization
  *
- * @method static via(GuardContract|RuleContract|SecurityPolicyContract|callable $guard)
- * @method static config(?string $key = null, $value = null)
- * @method array desensitize(array $data, array $definitions)
- * @method mixed invoke(mixed $value, string|RuleContract|callable $type)
+ * @method static Desensitizer via(GuardContract|RuleContract|SecurityPolicyContract|callable $guard)
+ * @method static Desensitizer config(?string $key = null, $value = null)
+ * @method static array desensitize(array $data, array $definitions)
+ * @method static mixed invoke(mixed $value, string|RuleContract|callable $type)
  */
 class Desensitization extends Facade
 {

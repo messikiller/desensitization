@@ -63,7 +63,7 @@ $data = [
 $desensitizer = new Desensitizer();
 
 $desensitizer->invoke('abc123', fn ($str) => strrev($str)); // 321cba
-$desensitizer->invoke('123456', (new Mask())->padding(2)->use(*)->repeat(3)); // 12***56
+$desensitizer->invoke('123456', Mask::create()->padding(2)->use(*)->repeat(3)); // 12***56
 $desensitizer->invoke('123456', 'mask|use:x|repeat:3|padding:1'); // 1xxx6
 
 $desensitizer = new Desensitizer();
@@ -79,15 +79,29 @@ $desensitizer->desensitize($data, [
 
 ### Laravel Integration
 
-For the Laravel framework, it supports automatic package discovery and loading, eliminating the need for manual installation. The desensitizer object is automatically bound in the Laravel container (unless accessed through the `global` method, which returns a local desensitizer object). You can quickly access the desensitizer object through the provided Facade:
+For the Laravel framework, it supports automatic package discovery and loading, eliminating the need for manual installation.
+
+If you want to make changes in the configuration you can publish the config file `desensitization.php` using:
+
+```bash
+php artisan vendor:publish --provider="Leoboy\Desensitization\Laravel\DesensitizationServiceProvider"
+```
+
+content of the configuation file:
+
+- `wildcardChar`, it define the wildcard character used in multi-dimension array searching, default is "*".
+- `keyDot`, it define the key separator used in multi-dimension array searching, default is ".".
+- `skipTransformationException`, tell the desensitizer to skip the exception thrown by the rule, default is boolean `false`.
+
+The desensitizer object is automatically bound in the Laravel container (unless accessed through the `global` method, which returns a local desensitizer object). You can quickly access the desensitizer object through the provided Facade:
 
 ```php
-use  Leoboy\Desensitization\Facades\Desensitization;
+use Leoboy\Desensitization\Laravel\Facades\Desensitization;
 
-Desensitization::global()->via(fn ($str) => strrev($str))->desensitize('abc123'); // 321cba
+Desensitization::global()->via(fn ($str) => strrev($str))->invoke('abc123'); // 321cba
 
 // return a local desensitizer object unless call global method
-Desensitization::via(new Mask())->transform($data, [
+Desensitization::via(Mask::create())->desensitize($data, [
     'foo' => new CustomRule(),
     'bar' => fn ($str) => strrev($str),
     'jax' => 'mask|use:x|repeat:3|padding:4'
@@ -128,12 +142,12 @@ class CustomRule implements RuleContract
 Currently, the package includes the following built-in rules:
 
 - `Leoboy\Desensitization\Rules\None`： No rule, returns the input value directly.
-- `Leoboy\Desensitization\Rules\Mask`：Masking rule, allowing you to specify mask characters, repetition count, and padding length, etc.: `(new Mask())->use('*')->repeat(3)->padding(2)`
-- `Leoboy\Desensitization\Rules\Replace`: Replacement rule, allowing you to specify characters to be replaced: `(new Replace('replacement_chars'))`
-- `Leoboy\Desensitization\Rules\Cut`：Truncation rule, allowing you to specify the truncation length: `(new Cust())->start(1)->length(3)`
--  `Leoboy\Desensitization\Rules\Invoke`：Executes a specified `callable` definition: `(new Invoke(fn ($str) => strrev($str)))`
-- `Leoboy\Desensitization\Rules\Hash`：Encryption rule, allowing you to specify a Hasher driver and hash parameters. The Hasher driver passed into the constructor or `use` method should implement the interface:` Illuminate\Contracts\Hashing\Hasher`. The default encryption algorithm is the Bcrypt driver: `(new Hash())->use(new Illuminate\Hashing\BcryptHasher())->options(['cost' => 10])`
-- `Leoboy\Desensitization\Rules\Mix`，Executes multiple rules, with the list of rules passed into the constructor: `(new Mix([new Replace('*'), new Mask()]))`
+- `Leoboy\Desensitization\Rules\Mask`：Masking rule, allowing you to specify mask characters, repetition count, and padding length, etc.: `Mask::create()->use('*')->repeat(3)->padding(2)`
+- `Leoboy\Desensitization\Rules\Replace`: Replacement rule, allowing you to specify characters to be replaced: `Replace::create()->use('replacement_chars')`
+- `Leoboy\Desensitization\Rules\Cut`：Truncation rule, allowing you to specify the truncation length: `Cut::create()->start(1)->length(3)`
+-  `Leoboy\Desensitization\Rules\Invoke`：Executes a specified `callable` definition: `Invoke::create(fn ($str) => strrev($str))`
+- `Leoboy\Desensitization\Rules\Hash`：Encryption rule, allowing you to specify a Hasher driver and hash parameters. The Hasher driver passed into the constructor or `use` method should implement the interface:` Illuminate\Contracts\Hashing\Hasher`. The default encryption algorithm is the Bcrypt driver: `Hash::create()->use(new Illuminate\Hashing\BcryptHasher())->options(['cost' => 10])`
+- `Leoboy\Desensitization\Rules\Mix`，Executes multiple rules, with the list of rules passed into the constructor: `Mix::create([Replace::create('*'), Mask::create()])`
 
 Rules can also use by short name:
 
@@ -226,10 +240,10 @@ Built-in security policies include:
 
 Desenseitization is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-With this powerful tool, you can flexibly define and apply desensitization rules based on your specific needs and security policies.
-
 ## Contact with me
 
 if you have any questions, you can issue a question.
+
+With this powerful tool, you can flexibly define and apply desensitization rules based on your specific needs and security policies.
 
 :heart: ENJOY IT!
