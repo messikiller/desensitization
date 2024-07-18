@@ -9,6 +9,7 @@ use Leoboy\Desensitization\Contracts\SecurityPolicyContract;
 use Leoboy\Desensitization\Contracts\TransformerContract;
 use Leoboy\Desensitization\Exceptions\DesensitizationException;
 use Leoboy\Desensitization\Exceptions\TransformException;
+use Leoboy\Desensitization\Guards\NoneGuard;
 use Throwable;
 
 class Desensitizer
@@ -21,14 +22,9 @@ class Desensitizer
     protected static $instance;
 
     /**
-     * security guard
+     * guarded security policy
      */
-    protected GuardContract $guard;
-
-    /**
-     * whether sef::$guard was set
-     */
-    protected bool $guarded = false;
+    protected SecurityPolicyContract $policy;
 
     /**
      * default configuration for desensitization
@@ -43,9 +39,10 @@ class Desensitizer
         array $config = [],
         string|GuardContract|RuleContract|SecurityPolicyContract|callable|null $guard = null
     ) {
-        if (! is_null($guard)) {
-            $this->via($guard);
+        if (is_null($guard)) {
+            $guard = new NoneGuard();
         }
+        $this->via($guard);
         $this->config = array_merge($this->config, $config);
     }
 
@@ -77,11 +74,7 @@ class Desensitizer
      */
     public function via(string|GuardContract|RuleContract|SecurityPolicyContract|callable $definition): self
     {
-        if (is_string($definition)) {
-            $definition = $this->parse($definition);
-        }
-        $this->guard = Factory::guard($definition);
-        $this->guarded = true;
+        $this->policy = Factory::guard($definition)->getSecurityPolicy();
 
         return $this;
     }
@@ -157,9 +150,6 @@ class Desensitizer
             }
             $dataKeys = $this->extractMatchedDataKeys($key, $dotKeys);
             $attribute = Factory::attribute($key, $type, $dataKeys);
-            if (! $this->guarded && ! ($attribute instanceof TransformerContract)) {
-                throw new DesensitizationException('Guard is required unless attribute is callable or rule, key: '.$key);
-            }
             $attributes[] = $attribute;
         }
 
@@ -178,32 +168,24 @@ class Desensitizer
      * 3. transform value with global guard or rule or callback:
      *      (new Desensitizer())->via($guardOrRule)->invoke($input, email');
      */
-    public function invoke(mixed $value, string|RuleContract|callable $type = ''): mixed
+    public function invoke(mixed $value, string|RuleContract|callable $type = '')
     {
-        if (is_string($type) && ! empty($type)) {
-            try {
-                $type = $this->parse($type);
-            } catch (DesensitizationException $e) {
-                // skip
-            }
-        }
-        if (! $this->guarded && is_string($type)) {
-            throw new DesensitizationException('Guard is required unless attribute is callable or rule');
-        }
         try {
-            return match (true) {
-                is_string($type) => $this->guard->getSecurityPolicy()->decide(
-                    Factory::attribute('__KEY__', $type, ['__KEY__'])
-                )->transform($value),
-                ($type instanceof RuleContract) => $type->transform($value),
-                is_callable($type) => call_user_func_array($type, [$value]),
-            };
+            $rule = Factory::rule($type);
+        } catch (DesensitizationException $e) {
+            $rule = Factory::rule($this->policy->decide(
+                Factory::attribute('__KEY__', $type, ['__KEY__'])
+            ));
+        }
+
+        try {
+            return $rule->transform($value);
         } catch (Throwable $th) {
             if ($this->config['skipTransformationException']) {
                 return $value;
             }
             throw new TransformException(sprintf(
-                'Orignal Message: %s, Data transformation failed, value: %s',
+                'Data transformation failed, Reason: %s, Value: %s',
                 $th->getMessage(),
                 var_export($value, true)
             ));
@@ -245,17 +227,14 @@ class Desensitizer
      */
     protected function transform(array $data, array $attributes): array
     {
-        $securityPolicy = $this->guarded ? $this->guard->getSecurityPolicy() : null;
         foreach ($attributes as $attribute) {
-            $guardedRule = $this->guarded ? $securityPolicy->decide($attribute) : null;
+            $guardedRule = Factory::rule($this->policy->decide($attribute));
             foreach ($attribute->getDataKeys() as $key) {
                 $original = Helper::arrayGet($data, $key, null, $this->config['keyDot']);
                 try {
                     $transformed = match (true) {
                         ($attribute instanceof TransformerContract) => $attribute->transform($original),
-                        is_callable($guardedRule) => call_user_func_array($guardedRule, [$original]),
-                        ($guardedRule instanceof TransformerContract) => $guardedRule->transform($original),
-                        default => throw new DesensitizationException('Transform attribute failed, attribute: '.var_export($attribute, true)),
+                        default => $guardedRule->transform($original),
                     };
                 } catch (Throwable $th) {
                     if ($this->config['skipTransformationException']) {

@@ -116,14 +116,16 @@ In practical application scenarios, it is often necessary to perform different d
 $desensitizer = new Desensitizer();
 $desensitizer->via(new User())->desensitize($data, [
     'foo' => 'email',
-    'bar.*' => 'password',
-    'baz.jax' => 'phone'
+    'bar.*' => 'mask|use:x|repeat:3|padding:4',
+    'baz.jax' => Replace::create()->use('-'),
+    'jaz' => fn ($input) => strrev($input),
     'frud.*'
 ])
 ```
 
-- The field attribute types defined in the `transform` method should generally be strings. If a `callable|RuleContract` type is defined, it will be executed first without going through the guard specified in `via`.
-- The `via` method is used to specify the guard to be passed through for the current desensitization process, and can also pass in a globally used rule or callback. Its parameter types are: `GuardContract|RuleContract|callable`.
+- The field attribute types defined in the `transform` method should generally be strings. If a `string` type cannot be relsolved as `RuleContract` or `callable|RuleContract` type is defined, it will be executed first without going through the guard specified in `via`.
+- The `via` method is used to specify the guard to be passed through for the current desensitization process, and can also pass in a globally used rule or callback. Its parameter types are: `string|GuardContract|RuleContract|SecurityPolicyContract|callable`.
+- if the `via` method is not called, the default guard `\Leoboy\Desensitization\Guards\NoneGuard` will be used, the guard does nothing to transform input value.
 
 ### RuleContract
 

@@ -67,13 +67,27 @@ final class DesensitizerTest extends TestCase
         );
     }
 
-    public function testInvokeUnguardedException(): void
+    public function testInvokePriority(): void
     {
-        $desensitizer = new Desensitizer();
+        $this->assertSame(
+            'lio--ssi',
+            (new Desensitizer())->invoke('lionel messi', 'mask|use:-|repeat:2|padding:3')
+        );
 
-        $this->expectException(DesensitizationException::class);
-        $this->expectExceptionMessageMatches('/^Guard is required.*/');
-        $desensitizer->invoke('xyzabc', 'unguarded_type');
+        $this->assertSame(
+            'lionel messi',
+            (new Desensitizer())->invoke('lionel messi', 'invalid_rule_and_ungarded')
+        );
+
+        $this->assertSame(
+            'lio--ssi',
+            (new Desensitizer())->via('replace|user:xxx')->invoke('lionel messi', 'mask|use:-|repeat:2|padding:3')
+        );
+
+        $this->assertSame(
+            '***',
+            (new Desensitizer())->via(Replace::create('***'))->invoke('lionel messi', 'invalid_rule_but_guarded')
+        );
     }
 
     public function testDesensitizePriority(): void
@@ -232,21 +246,29 @@ final class DesensitizerTest extends TestCase
         $testGuard = $this->createStub(GuardContract::class);
         $testGuard->method('getSecurityPolicy')->willReturn($testPolicy);
 
+        // via GuardContract
         $desensitizer->via($testGuard);
         $this->assertSame('transformed', $desensitizer->invoke('TestInput'));
 
+        // via RuleContract
         $testRule2 = $this->createStub(RuleContract::class);
         $testRule2->method('transform')->willReturn('xyz');
         $desensitizer->via($testRule2);
         $this->assertSame('xyz', $desensitizer->invoke('TestInput'));
 
+        // via SecurityPolicyContract
         $testPolicy2 = $this->createStub(SecurityPolicyContract::class);
         $testPolicy2->method('decide')->willReturn($testRule2);
         $desensitizer->via($testPolicy2);
         $this->assertSame('xyz', $desensitizer->invoke('TestInput'));
 
+        // via callable
         $desensitizer->via(fn ($input) => strrev($input));
         $this->assertSame('tupnItseT', $desensitizer->invoke('TestInput'));
+
+        // via string
+        $desensitizer->via('replace|use:$$$');
+        $this->assertSame('$$$', $desensitizer->invoke('TestInput'));
     }
 
     public function testRegister(): void

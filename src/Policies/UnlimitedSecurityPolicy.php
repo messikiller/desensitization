@@ -12,6 +12,6 @@ class UnlimitedSecurityPolicy extends RuleFixedSecurityPolicy implements Securit
 {
     public function __construct()
     {
-        $this->rule = new None();
+        parent::__construct(new None());
     }
 }

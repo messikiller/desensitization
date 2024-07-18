@@ -7,5 +7,5 @@ interface SecurityPolicyContract
     /**
      * determine which rule to use for the given attribute
      */
-    public function decide(AttributeContract $attribute): RuleContract|callable;
+    public function decide(AttributeContract $attribute): RuleContract|callable|string;
 }
