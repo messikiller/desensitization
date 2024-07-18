@@ -2,8 +2,11 @@
 
 namespace Leoboy\Desensitization\Tests;
 
+use Illuminate\Hashing\ArgonHasher;
+use Illuminate\Hashing\BcryptHasher;
 use Leoboy\Desensitization\Desensitizer;
 use Leoboy\Desensitization\Rules\Cut;
+use Leoboy\Desensitization\Rules\Hash;
 use Leoboy\Desensitization\Rules\Mask;
 use Leoboy\Desensitization\Rules\Mix;
 use Leoboy\Desensitization\Rules\None;
@@ -21,6 +24,23 @@ final class RulesTest extends TestCase
             $expectedOutput,
             $desensitizer->invoke($input, $cutRule)
         );
+    }
+
+    public function testHash(): void
+    {
+        $desensitizer = new Desensitizer();
+        $bcryptHasher = new BcryptHasher();
+        $argonHasher = new ArgonHasher();
+
+        $this->assertTrue($bcryptHasher->check(
+            'LionelMessi',
+            $desensitizer->invoke('LionelMessi', Hash::create()->use($bcryptHasher))
+        ));
+
+        $this->assertTrue($argonHasher->check(
+            'CristianoRonaldo',
+            $desensitizer->invoke('CristianoRonaldo', Hash::create()->use($argonHasher))
+        ));
     }
 
     #[DataProvider('maskDataProvider')]
