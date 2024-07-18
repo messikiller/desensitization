@@ -9,7 +9,6 @@ use Leoboy\Desensitization\Contracts\SecurityPolicyContract;
 use Leoboy\Desensitization\Contracts\TransformerContract;
 use Leoboy\Desensitization\Exceptions\DesensitizationException;
 use Leoboy\Desensitization\Exceptions\TransformException;
-use ReflectionClass;
 use Throwable;
 
 class Desensitizer
@@ -30,17 +29,6 @@ class Desensitizer
      * whether sef::$guard was set
      */
     protected bool $guarded = false;
-
-    /**
-     * registered rules list: short => rule
-     */
-    protected array $shortRules = [
-        'cut' => \Leoboy\Desensitization\Rules\Cut::class,
-        'hash' => \Leoboy\Desensitization\Rules\Hash::class,
-        'mask' => \Leoboy\Desensitization\Rules\Mask::class,
-        'none' => \Leoboy\Desensitization\Rules\None::class,
-        'replace' => \Leoboy\Desensitization\Rules\Replace::class,
-    ];
 
     /**
      * default configuration for desensitization
@@ -121,20 +109,11 @@ class Desensitizer
      */
     public function register(string $ruleClass, string $short, bool $override = false): static
     {
-        if (! class_exists($ruleClass)) {
-            throw new DesensitizationException('The registering rule is not existed: '.$ruleClass);
-        }
-        $reflector = new ReflectionClass($ruleClass);
-        if (! $reflector->implementsInterface(RuleContract::class)) {
-            throw new DesensitizationException('The registering rule must implement RuleContract: '.$ruleClass);
-        }
-        if (! $reflector->isInstantiable()) {
-            throw new DesensitizationException('The registering rule must be instantiable: '.$ruleClass);
-        }
-        if (! $override && isset($this->shortRules[$short])) {
+        if (! $override && RuleResolver::has($short)) {
             throw new DesensitizationException('The short name has already registered: '.$short);
         }
-        $this->shortRules[$short] = $ruleClass;
+
+        RuleResolver::register($short, $ruleClass);
 
         return $this;
     }
@@ -144,31 +123,13 @@ class Desensitizer
      */
     public function parse(string $definition): RuleContract
     {
-        [$nameParams, $methodParams] = str_contains($definition, '|')
-            ? explode('|', $definition, 2)
-            : [$definition, ''];
-        [$ruleName, $creationParams] = str_contains($nameParams, ':')
-            ? explode(':', $nameParams, 2)
-            : [$nameParams, ''];
-        if (! isset($this->shortRules[$ruleName])) {
-            throw new DesensitizationException('The rule is not registered: '.$ruleName);
-        }
-        $ruleClass = $this->shortRules[$ruleName];
-        $rule = new $ruleClass(...explode(',', $creationParams));
-        foreach (explode('|', $methodParams) as $methodParam) {
-            [$methodName, $params] = str_contains($methodParam, ':')
-                ? explode(':', $methodParam)
-                : [$methodParam, ''];
-            if (method_exists($rule, $methodName)) {
-                $rule->{$methodName}(...explode(',', $params));
-            }
-        }
-
-        return $rule;
+        return RuleResolver::resolve($definition);
     }
 
     /**
      * data desensitization method
+     *
+     * @var string|RuleContract|callable[]
      *
      * definitions EXAMPLE:
      *  [
