@@ -1,0 +1,20 @@
+<?php
+
+use Leoboy\Desensitization\Desensitizer;
+use Leoboy\Desensitization\Rules\Replace;
+use App\Rules\CustomRule;
+
+$desensitzer = new Desensitizer();
+
+// Multi-dimension array transforamtion
+$desensitizer->via('replace|use:-')->desensitize($data, [
+    'foo' => Replace::create()->use('$$$'),
+    'bar' => new CustomRule(),
+    'baz.*' => fn ($str) => strrev($str),
+    'qux.*.fred' => 'mask|use:*|repeat:3|padding:2',
+    'jaz' => 'custom-attr-type',
+    'jax.frud'
+]);
+
+// Single value transformation
+$desensitzer->invoke('SensitivePasswordValue', 'mask|use:*|repeat:3|padding:2');
