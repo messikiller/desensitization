@@ -2,7 +2,7 @@
 
 A powerful PHP data desensitization tool with built-in rich desensitization calculation rules: masking, encryption, truncation, replacement, and more. It also supports dynamic authorization desensitization based on security policies.
 
-<p align="center"><img src="logo.svg" width="90%" alt="Logo Leoboy Desensitization"></p>
+<p align="center"><img src="logo.svg" width="100%" alt="Logo Leoboy Desensitization"></p>
 
 ## Features
 
