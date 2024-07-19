@@ -16,6 +16,8 @@ interface AttributeContract
 
     /**
      * get data keys contained in virtual key
+     *
+     * @return string[]
      */
     public function getDataKeys(): array;
 }

@@ -55,13 +55,13 @@ class RuleResolver
         return isset(static::$registered[$identifier]);
     }
 
-    public static function register(string $identifier, string $ruleClass)
+    public static function register(string $identifier, string $ruleClass): void
     {
         static::validate($ruleClass);
         static::$registered[$identifier] = $ruleClass;
     }
 
-    public static function validate(string $ruleClass)
+    public static function validate(string $ruleClass): void
     {
         if (! class_exists($ruleClass)) {
             throw new RuleResolveException('The rule is not existed: '.$ruleClass);

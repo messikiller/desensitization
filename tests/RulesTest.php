@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 final class RulesTest extends TestCase
 {
     #[DataProvider('cutDataProvider')]
-    public function testCut(Cut $cutRule, $input, $expectedOutput): void
+    public function testCut(Cut $cutRule, mixed $input, mixed $expectedOutput): void
     {
         $desensitizer = new Desensitizer();
         $this->assertSame(
@@ -44,7 +44,7 @@ final class RulesTest extends TestCase
     }
 
     #[DataProvider('maskDataProvider')]
-    public function testMask(Mask $maskRule, $input, $expectedOutput): void
+    public function testMask(Mask $maskRule, mixed $input, mixed $expectedOutput): void
     {
         $desensitizer = new Desensitizer();
         $this->assertSame(

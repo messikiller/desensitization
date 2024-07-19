@@ -17,9 +17,9 @@ class Desensitizer
     /**
      * global instance
      *
-     * @var static
+     * @var static|null
      */
-    protected static $instance;
+    protected static $instance = null;
 
     /**
      * guarded security policy
@@ -28,6 +28,8 @@ class Desensitizer
 
     /**
      * default configuration for desensitization
+     *
+     * @var array<string, mixed>
      */
     protected array $config = [
         'wildcardChar' => '*',
@@ -35,6 +37,9 @@ class Desensitizer
         'skipTransformationException' => false,
     ];
 
+    /**
+     * @param  array<string, mixed>  $config
+     */
     public function __construct(
         array $config = [],
         string|GuardContract|RuleContract|SecurityPolicyContract|callable|null $guard = null
@@ -120,9 +125,7 @@ class Desensitizer
     }
 
     /**
-     * data desensitization method
-     *
-     * @var string|RuleContract|callable[]
+     * data desensitization method.
      *
      * definitions EXAMPLE:
      *  [
@@ -167,6 +170,8 @@ class Desensitizer
      *      (new Desensitizer())->invoke($input, fn ($val) => strrev($val));
      * 3. transform value with global guard or rule or callback:
      *      (new Desensitizer())->via($guardOrRule)->invoke($input, email');
+     *
+     * @return mixed
      */
     public function invoke(mixed $value, string|RuleContract|callable $type = '')
     {

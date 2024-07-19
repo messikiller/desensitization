@@ -18,10 +18,8 @@ abstract class AbstractRule implements RuleContract
 
     /**
      * assert input is transformable.
-     *
-     * @return void
      */
-    protected function assertTransformable(bool|callable $assertable, string $message)
+    protected function assertTransformable(bool|callable $assertable, string $message): void
     {
         if (is_callable($assertable)) {
             $assertable = $assertable();
@@ -31,7 +29,7 @@ abstract class AbstractRule implements RuleContract
         }
     }
 
-    protected function assertTransformableType($input, string|array $type)
+    protected function assertTransformableType(mixed $input, string|array $type): void
     {
         $this->assertTransformable(
             in_array(gettype($input), (array) $type),
@@ -43,9 +41,8 @@ abstract class AbstractRule implements RuleContract
      * assert input is like string.
      *
      * @param  mixed  $input
-     * @return void
      */
-    protected function assertLikeString($input)
+    protected function assertLikeString($input): void
     {
         $this->assertTransformableType($input, ['string', 'integer', 'double']);
     }

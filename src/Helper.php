@@ -57,7 +57,7 @@ final class Helper
      * Set an item on an array or object using dot notation.
      * Adapted from: https://github.com/illuminate/support/blob/v5.3.23/helpers.php#L437
      *
-     * @param  mixed  $target
+     * @param  scalar|array<mixed, mixed>  $target
      * @param  string|array|null  $key
      * @param  mixed  $value
      * @param  bool  $overwrite
@@ -110,6 +110,7 @@ final class Helper
             $target = [];
 
             if ($segments) {
+                /** @var array $target[$segment] */
                 self::arraySet($target[$segment], $segments, $value, $overwrite, $divider, $wildcardChar);
             } elseif ($overwrite) {
                 $target[$segment] = $value;

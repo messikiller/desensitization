@@ -13,8 +13,16 @@ class GenericAttribute implements AttributeContract
 
     protected string $type;
 
+    /**
+     * real data keys which contained in the attribute
+     *
+     * @var string[]
+     */
     protected array $dataKeys = [];
 
+    /**
+     * @param  string[]  $dataKeys
+     */
     public function __construct(string $key, string $type, array $dataKeys = [])
     {
         $this->key = $key;

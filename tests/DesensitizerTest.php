@@ -120,7 +120,7 @@ final class DesensitizerTest extends TestCase
         $reflector->setAccessible(true);
 
         $desensitizer = new Desensitizer();
-        $caller = fn () => $reflector->invoke($desensitizer, ...func_get_args());
+        $caller = fn (...$args) => $reflector->invoke($desensitizer, ...$args);
 
         $this->assertSame(['testkey'], $caller('testkey', [
             'k', 'k1.0', 'k1.x', 'testkey', 'k2.y',
@@ -191,7 +191,7 @@ final class DesensitizerTest extends TestCase
     }
 
     #[DataProvider('parseDataProvider')]
-    public function testParse($definition, $expectedClass, $input, $expectedOutput): void
+    public function testParse(string $definition, string $expectedClass, mixed $input, mixed $expectedOutput): void
     {
         $desensitizer = new Desensitizer();
         $testMaskRule = $desensitizer->parse($definition);

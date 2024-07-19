@@ -11,6 +11,9 @@ use Leoboy\Desensitization\Exceptions\DesensitizationException;
  */
 class InvokableAttribute implements AttributeContract, TransformerContract
 {
+    /**
+     * @var string[]
+     */
     protected array $dataKeys = [];
 
     /**
@@ -20,6 +23,9 @@ class InvokableAttribute implements AttributeContract, TransformerContract
      */
     protected $callback;
 
+    /**
+     * @param  string[]  $dataKeys
+     */
     public function __construct(callable $callback, array $dataKeys = [])
     {
         $this->callback = $callback;

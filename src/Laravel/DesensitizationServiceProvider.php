@@ -23,7 +23,7 @@ class DesensitizationServiceProvider extends ServiceProvider implements Deferrab
         );
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->publishes([
             __DIR__.'/config/desensitization.php',
