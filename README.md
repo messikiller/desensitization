@@ -14,7 +14,7 @@ A powerful PHP data desensitization tool with built-in rich desensitization calc
 
 ## Environment
 
-- PHP >= 8.0
+- PHP >= 8.2
 - Composer
 
 ## Quick Start
