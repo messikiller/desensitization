@@ -4,15 +4,15 @@ return [
     /**
      * define how to match multi-dimensional array keys
      */
-    'wildcardChar' => '*',
+    'wildcard_char' => '*',
 
     /**
      * divide multi-dimensional array keys
      */
-    'keyDot' => '.',
+    'key_dot' => '.',
 
     /**
      * continue processing when an exception occurs
      */
-    'skipTransformationException' => false,
+    'skip_transformation_exception' => false,
 ];

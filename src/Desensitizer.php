@@ -22,20 +22,14 @@ class Desensitizer
     protected static $instance = null;
 
     /**
-     * guarded security policy
+     * guarded security policy.
      */
     protected SecurityPolicyContract $policy;
 
     /**
-     * default configuration for desensitization
-     *
-     * @var array<string, mixed>
+     * configuration for desensitization.
      */
-    protected array $config = [
-        'wildcardChar' => '*',
-        'keyDot' => '.',
-        'skipTransformationException' => false,
-    ];
+    protected Config $config;
 
     /**
      * @param  array<string, mixed>  $config
@@ -48,7 +42,7 @@ class Desensitizer
             $guard = new NoneGuard();
         }
         $this->via($guard);
-        $this->config = array_merge($this->config, $config);
+        $this->config = new Config($config);
     }
 
     /**
@@ -92,12 +86,14 @@ class Desensitizer
     public function config(?string $key = null, $value = null): mixed
     {
         if (is_null($key)) {
-            return $this->config;
+            return $this->config->toArray();
         }
+
         if (is_null($value)) {
-            return Helper::arrayGet($this->config, $key, null);
+            return $this->config->get($key, null);
         }
-        Helper::arraySet($this->config, $key, $value);
+
+        $this->config->set($key, $value);
 
         return $this;
     }
@@ -136,7 +132,7 @@ class Desensitizer
      */
     public function desensitize(array $data, array $definitions): array
     {
-        $dotArray = Helper::arrayDot($data, $this->config['keyDot']);
+        $dotArray = Helper::arrayDot($data, $this->config->getKeyDot());
         $dotKeys = array_keys($dotArray);
         $attributes = [];
 
@@ -186,7 +182,7 @@ class Desensitizer
         try {
             return $rule->transform($value);
         } catch (Throwable $th) {
-            if ($this->config['skipTransformationException']) {
+            if ($this->config->shouldSkipTransformationException()) {
                 return $value;
             }
             throw new TransformException(sprintf(
@@ -202,8 +198,8 @@ class Desensitizer
      */
     protected function extractMatchedDataKeys(string $key, array $dotKeys): array
     {
-        $wildcardChar = $this->config['wildcardChar'];
-        $keyDot = $this->config['keyDot'];
+        $wildcardChar = $this->config->getWildcardChar();
+        $keyDot = $this->config->getKeyDot();
         if (! str_contains($key, $wildcardChar)) {
             $realKeysExisted = count(array_filter(
                 $dotKeys,
@@ -235,14 +231,19 @@ class Desensitizer
         foreach ($attributes as $attribute) {
             $guardedRule = Factory::rule($this->policy->decide($attribute));
             foreach ($attribute->getDataKeys() as $key) {
-                $original = Helper::arrayGet($data, $key, null, $this->config['keyDot']);
+                $original = Helper::arrayGet(
+                    $data,
+                    $key,
+                    null,
+                    $this->config->getKeyDot()
+                );
                 try {
                     $transformed = match (true) {
                         ($attribute instanceof TransformerContract) => $attribute->transform($original),
                         default => $guardedRule->transform($original),
                     };
                 } catch (Throwable $th) {
-                    if ($this->config['skipTransformationException']) {
+                    if ($this->config->shouldSkipTransformationException()) {
                         continue;
                     }
                     throw new TransformException('Attribute transformation failed, value: '.var_export($attribute, true));
@@ -252,8 +253,8 @@ class Desensitizer
                     $key,
                     $transformed,
                     true,
-                    $this->config['keyDot'],
-                    $this->config['wildcardChar']
+                    $this->config->getKeyDot(),
+                    $this->config->getWildcardChar()
                 );
             }
         }

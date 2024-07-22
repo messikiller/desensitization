@@ -12,9 +12,9 @@ final class LaravelTest extends TestCase
 
     public function testConfig(): void
     {
-        $this->assertSame('*', $this->app['config']->get('desensitization.wildcardChar'));
-        $this->assertSame('.', $this->app['config']->get('desensitization.keyDot'));
-        $this->assertSame(false, $this->app['config']->get('desensitization.skipTransformationException'));
+        $this->assertSame('*', $this->app['config']->get('desensitization.wildcard_char'));
+        $this->assertSame('.', $this->app['config']->get('desensitization.key_dot'));
+        $this->assertSame(false, $this->app['config']->get('desensitization.skip_transformation_exception'));
     }
 
     public function testServiceProvider(): void

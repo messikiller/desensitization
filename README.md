@@ -89,9 +89,9 @@ php artisan vendor:publish --provider="Leoboy\Desensitization\Laravel\Desensitiz
 
 content of the configuation file:
 
-- `wildcardChar`, it define the wildcard character used in multi-dimension array searching, default is "*".
-- `keyDot`, it define the key separator used in multi-dimension array searching, default is ".".
-- `skipTransformationException`, tell the desensitizer to skip the exception thrown by the rule, default is boolean `false`.
+- `wildcard_char`, it define the wildcard character used in multi-dimension array searching, default is "*".
+- `key_dot`, it define the key separator used in multi-dimension array searching, default is ".".
+- `skip_transformation_exception`, tell the desensitizer whether skip the exception thrown by the rule or not, default is boolean `false`.
 
 The desensitizer object is automatically bound in the Laravel container (unless accessed through the `global` method, which returns a local desensitizer object). You can quickly access the desensitizer object through the provided Facade:
 

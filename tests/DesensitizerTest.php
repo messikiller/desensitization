@@ -150,9 +150,9 @@ final class DesensitizerTest extends TestCase
 
         $this->assertSame(
             [
-                'wildcardChar' => '*',
-                'keyDot' => '.',
-                'skipTransformationException' => false,
+                'wildcard_char' => '*',
+                'key_dot' => '.',
+                'skip_transformation_exception' => false,
             ],
             $desensitizer->config()
         );
@@ -171,8 +171,8 @@ final class DesensitizerTest extends TestCase
             ],
         ];
 
-        $desensitizer->config('keyDot', '__');
-        $desensitizer->config('wildcardChar', '-');
+        $desensitizer->config('key_dot', '__');
+        $desensitizer->config('wildcard_char', '-');
 
         $desensitized = $desensitizer->desensitize($data, [
             'a__b__m-' => (new Mask())->use('*')->padding(1)->repeat(3),
