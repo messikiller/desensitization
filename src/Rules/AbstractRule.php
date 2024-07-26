@@ -1,10 +1,26 @@
 <?php
 
+/*
+ * This file is part of the Leoboy\Desensitization package.
+ *
+ * (c) messikiller <messikiller@aliyun.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @package Leoboy\Desensitization
+ * @author messikiller <messikiller@aliyun.com>
+ */
+
 namespace Leoboy\Desensitization\Rules;
 
 use Leoboy\Desensitization\Contracts\RuleContract;
 use Leoboy\Desensitization\Exceptions\TransformException;
 
+/**
+ * the abstract rule class. typically, it is recommended that you should extend
+ * this class, it contains some usefull methods for all rules.
+ */
 abstract class AbstractRule implements RuleContract
 {
     /**
@@ -18,6 +34,8 @@ abstract class AbstractRule implements RuleContract
 
     /**
      * assert input is transformable.
+     *
+     * @throws TransformException
      */
     protected function assertTransformable(bool|callable $assertable, string $message): void
     {
@@ -29,6 +47,11 @@ abstract class AbstractRule implements RuleContract
         }
     }
 
+    /**
+     * assert input data type is transformable.
+     *
+     * @throws TransformException
+     */
     protected function assertTransformableType(mixed $input, string|array $type): void
     {
         $this->assertTransformable(
@@ -41,6 +64,8 @@ abstract class AbstractRule implements RuleContract
      * assert input is like string.
      *
      * @param  mixed  $input
+     *
+     * @throws TransformException
      */
     protected function assertLikeString($input): void
     {
@@ -52,6 +77,8 @@ abstract class AbstractRule implements RuleContract
      *
      * @param  mixed  $input
      * @return void
+     *
+     * @throws TransformException
      */
     protected function assertCallable($input)
     {

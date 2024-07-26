@@ -1,10 +1,25 @@
 <?php
 
+/*
+ * This file is part of the Leoboy\Desensitization package.
+ *
+ * (c) messikiller <messikiller@aliyun.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @package Leoboy\Desensitization
+ * @author messikiller <messikiller@aliyun.com>
+ */
+
 namespace Leoboy\Desensitization\Rules;
 
 use Leoboy\Desensitization\Contracts\RuleContract;
 use Leoboy\Desensitization\Exceptions\InvalidRuleException;
 
+/**
+ * use multiple rules to transform data
+ */
 class Mix extends AbstractRule implements RuleContract
 {
     /**
@@ -34,6 +49,9 @@ class Mix extends AbstractRule implements RuleContract
         return $this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function transform($input)
     {
         foreach ($this->rules as $rule) {

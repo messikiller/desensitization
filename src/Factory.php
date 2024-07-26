@@ -1,5 +1,17 @@
 <?php
 
+/*
+ * This file is part of the Leoboy\Desensitization package.
+ *
+ * (c) messikiller <messikiller@aliyun.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @package Leoboy\Desensitization
+ * @author messikiller <messikiller@aliyun.com>
+ */
+
 namespace Leoboy\Desensitization;
 
 use Leoboy\Desensitization\Attributes\GenericAttribute;
@@ -13,8 +25,16 @@ use Leoboy\Desensitization\Guards\PolicyFixedGuard;
 use Leoboy\Desensitization\Guards\RuleFixedGuard;
 use Leoboy\Desensitization\Rules\Invoke;
 
+/**
+ * the factory of desensitization.
+ */
 class Factory
 {
+    /**
+     * produce a attribute object.
+     *
+     * @throws DesensitizationException
+     */
     public static function attribute(string $key = '', mixed $type = '', array $dataKeys = []): AttributeContract
     {
         return match (true) {
@@ -25,6 +45,11 @@ class Factory
         };
     }
 
+    /**
+     * produce a guard object.
+     *
+     * @throws DesensitizationException
+     */
     public static function guard(mixed $definition): GuardContract
     {
         return match (true) {
@@ -37,6 +62,11 @@ class Factory
         };
     }
 
+    /**
+     * produce a rule object.
+     *
+     * @throws DesensitizationException
+     */
     public static function rule(mixed $definition): RuleContract
     {
         return match (true) {

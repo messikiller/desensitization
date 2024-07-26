@@ -1,5 +1,17 @@
 <?php
 
+/*
+ * This file is part of the Leoboy\Desensitization package.
+ *
+ * (c) messikiller <messikiller@aliyun.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @package Leoboy\Desensitization
+ * @author messikiller <messikiller@aliyun.com>
+ */
+
 namespace Leoboy\Desensitization;
 
 use Leoboy\Desensitization\Contracts\AttributeContract;
@@ -12,6 +24,9 @@ use Leoboy\Desensitization\Exceptions\TransformException;
 use Leoboy\Desensitization\Guards\NoneGuard;
 use Throwable;
 
+/**
+ * the main desensitization utility class.
+ */
 class Desensitizer
 {
     /**
