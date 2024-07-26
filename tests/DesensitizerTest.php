@@ -18,7 +18,7 @@ final class DesensitizerTest extends TestCase
 {
     public function testDesensitize(): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
 
         $data = [
             'k1' => 'abcdefg',
@@ -34,7 +34,7 @@ final class DesensitizerTest extends TestCase
         ];
         $desensitized = $desensitizer->desensitize($data, [
             'k1' => (fn ($str) => strrev($str)),
-            'k2.k2_1' => new Mask(),
+            'k2.k2_1' => new Mask,
             'k2.subkey.*' => new Replace('-'),
             'k2.xyz' => 'mask|use:-|repeat:2|padding:3',
         ]);
@@ -47,7 +47,7 @@ final class DesensitizerTest extends TestCase
 
     public function testInvoke(): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
 
         $this->assertSame(
             '654321',
@@ -71,29 +71,29 @@ final class DesensitizerTest extends TestCase
     {
         $this->assertSame(
             'lio--ssi',
-            (new Desensitizer())->invoke('lionel messi', 'mask|use:-|repeat:2|padding:3')
+            (new Desensitizer)->invoke('lionel messi', 'mask|use:-|repeat:2|padding:3')
         );
 
         $this->assertSame(
             'lionel messi',
-            (new Desensitizer())->invoke('lionel messi', 'invalid_rule_and_ungarded')
+            (new Desensitizer)->invoke('lionel messi', 'invalid_rule_and_ungarded')
         );
 
         $this->assertSame(
             'lio--ssi',
-            (new Desensitizer())->via('replace|user:xxx')->invoke('lionel messi', 'mask|use:-|repeat:2|padding:3')
+            (new Desensitizer)->via('replace|user:xxx')->invoke('lionel messi', 'mask|use:-|repeat:2|padding:3')
         );
 
         $this->assertSame(
             '***',
-            (new Desensitizer())->via(Replace::create('***'))->invoke('lionel messi', 'invalid_rule_but_guarded')
+            (new Desensitizer)->via(Replace::create('***'))->invoke('lionel messi', 'invalid_rule_but_guarded')
         );
     }
 
     public function testDesensitizePriority(): void
     {
-        $desensitizer = new Desensitizer();
-        $desensitizer->via((new Mask())->use('-')->repeat(3)->padding(1));
+        $desensitizer = new Desensitizer;
+        $desensitizer->via((new Mask)->use('-')->repeat(3)->padding(1));
 
         $data = [
             'k1' => 'abcdefg',
@@ -119,7 +119,7 @@ final class DesensitizerTest extends TestCase
         $reflector = new ReflectionMethod(Desensitizer::class, 'extractMatchedDataKeys');
         $reflector->setAccessible(true);
 
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
         $caller = fn (...$args) => $reflector->invoke($desensitizer, ...$args);
 
         $this->assertSame(['testkey'], $caller('testkey', [
@@ -146,7 +146,7 @@ final class DesensitizerTest extends TestCase
 
     public function testConfig(): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
 
         $this->assertSame(
             [
@@ -175,7 +175,7 @@ final class DesensitizerTest extends TestCase
         $desensitizer->config('wildcard_char', '-');
 
         $desensitized = $desensitizer->desensitize($data, [
-            'a__b__m-' => (new Mask())->use('*')->padding(1)->repeat(3),
+            'a__b__m-' => (new Mask)->use('*')->padding(1)->repeat(3),
         ]);
 
         $this->assertSame([
@@ -193,7 +193,7 @@ final class DesensitizerTest extends TestCase
     #[DataProvider('parseDataProvider')]
     public function testParse(string $definition, string $expectedClass, mixed $input, mixed $expectedOutput): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
         $testMaskRule = $desensitizer->parse($definition);
         $this->assertInstanceOf($expectedClass, $testMaskRule);
         $this->assertSame(
@@ -205,7 +205,7 @@ final class DesensitizerTest extends TestCase
     public function testParseFailureException(): void
     {
         $this->expectException(DesensitizationException::class);
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
         $desensitizer->parse('invalid');
     }
 
@@ -227,7 +227,7 @@ final class DesensitizerTest extends TestCase
 
     public function testGlobalize(): void
     {
-        $local = new Desensitizer();
+        $local = new Desensitizer;
         $local->via('mask|use:*|repeat:2|padding:2')->globalize();
         $this->assertSame(Desensitizer::global(), $local);
         $this->assertSame('Cr**do', Desensitizer::global()->invoke('CristianoRonaldo'));
@@ -235,7 +235,7 @@ final class DesensitizerTest extends TestCase
 
     public function testVia(): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
 
         $testRule = $this->createStub(RuleContract::class);
         $testRule->method('transform')->willReturn('transformed');
@@ -275,7 +275,7 @@ final class DesensitizerTest extends TestCase
     {
         \Leoboy\Desensitization\Tests\Rules\Custom::$handler = fn ($input) => strrev($input);
 
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
         $desensitizer->register(\Leoboy\Desensitization\Tests\Rules\Custom::class, 'custom');
         $this->assertSame('tupnItseT', $desensitizer->invoke('TestInput', 'custom'));
     }

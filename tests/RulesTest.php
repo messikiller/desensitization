@@ -19,7 +19,7 @@ final class RulesTest extends TestCase
     #[DataProvider('cutDataProvider')]
     public function testCut(Cut $cutRule, mixed $input, mixed $expectedOutput): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
         $this->assertSame(
             $expectedOutput,
             $desensitizer->invoke($input, $cutRule)
@@ -28,9 +28,9 @@ final class RulesTest extends TestCase
 
     public function testHash(): void
     {
-        $desensitizer = new Desensitizer();
-        $bcryptHasher = new BcryptHasher();
-        $argonHasher = new ArgonHasher();
+        $desensitizer = new Desensitizer;
+        $bcryptHasher = new BcryptHasher;
+        $argonHasher = new ArgonHasher;
 
         $this->assertTrue($bcryptHasher->check(
             'LionelMessi',
@@ -46,7 +46,7 @@ final class RulesTest extends TestCase
     #[DataProvider('maskDataProvider')]
     public function testMask(Mask $maskRule, mixed $input, mixed $expectedOutput): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
         $this->assertSame(
             $expectedOutput,
             $desensitizer->invoke($input, $maskRule)
@@ -55,7 +55,7 @@ final class RulesTest extends TestCase
 
     public function testReplace(): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
         $this->assertSame(
             '-',
             $desensitizer->invoke('abc123', Replace::create()->use('-'))
@@ -64,7 +64,7 @@ final class RulesTest extends TestCase
 
     public function testNone(): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
         $this->assertSame(
             'abc123',
             $desensitizer->invoke('abc123', None::create())
@@ -73,7 +73,7 @@ final class RulesTest extends TestCase
 
     public function testMix(): void
     {
-        $desensitizer = new Desensitizer();
+        $desensitizer = new Desensitizer;
         $this->assertSame(
             'i***L',
             $desensitizer->invoke(

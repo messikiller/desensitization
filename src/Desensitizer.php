@@ -54,7 +54,7 @@ class Desensitizer
         string|GuardContract|RuleContract|SecurityPolicyContract|callable|null $guard = null
     ) {
         if (is_null($guard)) {
-            $guard = new NoneGuard();
+            $guard = new NoneGuard;
         }
         $this->via($guard);
         $this->config = new Config($config);

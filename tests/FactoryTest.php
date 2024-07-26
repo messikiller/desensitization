@@ -22,7 +22,7 @@ final class FactoryTest extends TestCase
         $this->assertInstanceOf(InvokableAttribute::class, $attribute);
         $this->assertSame('dcba', $attribute->transform('abcd'));
 
-        $attribute = Factory::attribute('testKey2', new Mask());
+        $attribute = Factory::attribute('testKey2', new Mask);
         $this->assertInstanceOf(InvokableAttribute::class, $attribute);
         $this->assertSame('a***z', $attribute->transform('abc123456567xyz'));
     }
