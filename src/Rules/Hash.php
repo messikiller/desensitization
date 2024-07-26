@@ -38,7 +38,7 @@ class Hash extends AbstractRule implements RuleContract
     public function __construct(?HasherContract $hasher = null)
     {
         if (is_null($hasher)) {
-            $hasher = new BcryptHasher();
+            $hasher = new BcryptHasher;
         }
         $this->use($hasher);
     }

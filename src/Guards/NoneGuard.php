@@ -24,6 +24,6 @@ class NoneGuard extends RuleFixedGuard implements GuardContract
 {
     public function __construct()
     {
-        parent::__construct(new None());
+        parent::__construct(new None);
     }
 }
