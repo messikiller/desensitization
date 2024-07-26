@@ -1,4 +1,4 @@
-name: PHPstan & PHPunit & Pint
+name: Pint & PHPstan & PHPunit
 
 on:
   push:
@@ -7,16 +7,45 @@ on:
     branches: [ "main" ]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  build:
 
+  lint:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
         php: [8.2]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: json, dom, curl, libxml, mbstring
+          coverage: none
+
+      - name: Install Pint
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run Pint
+        run: vendor/bin/pint
+
+      - name: Commit linted files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Fixes coding style"
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.2, 8.3]
 
     steps:
     - name: Checkout code
@@ -44,10 +73,10 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
-    - name: Run Pint
+    - name: Run Pint Test
       run: vendor/bin/pint --test
 
-    - name: Run PHPstan
+    - name: Run PHPstan Test
       run: vendor/bin/phpstan analyse src tests
 
     - name: Run Unit Test
