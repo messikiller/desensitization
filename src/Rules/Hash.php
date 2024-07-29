@@ -32,13 +32,15 @@ class Hash extends AbstractRule implements RuleContract
 
     /**
      * configuration for the specified driver.
+     *
+     * @var array<mixed, mixed>
      */
     protected array $options = [];
 
     public function __construct(?HasherContract $hasher = null)
     {
         if (is_null($hasher)) {
-            $hasher = new BcryptHasher;
+            $hasher = new BcryptHasher();
         }
         $this->use($hasher);
     }
@@ -55,6 +57,8 @@ class Hash extends AbstractRule implements RuleContract
 
     /**
      * set hasher options
+     *
+     * @param  array<mixed, mixed>  $options
      */
     public function options(array $options): self
     {

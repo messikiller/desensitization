@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Leoboy\Desensitization package.
  *
@@ -25,15 +27,18 @@ class Mix extends AbstractRule implements RuleContract
     /**
      * bound rules list
      *
-     * @var RuleContract[]
+     * @var array<RuleContract>
      */
     protected array $rules = [];
 
+    /**
+     * @param  array<RuleContract>  $rules
+     */
     public function __construct(array $rules = [])
     {
         foreach ($rules as $rule) {
             if (! ($rule instanceof RuleContract)) {
-                throw new InvalidRuleException('Rule must be instance of RuleContract: '.get_class($rule));
+                throw new InvalidRuleException('Rule must be instance of RuleContract: '.$rule::class);
             }
         }
         $this->rules = $rules;

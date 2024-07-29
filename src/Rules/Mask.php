@@ -52,7 +52,7 @@ class Mask extends AbstractRule implements RuleContract
         $left = $this->paddingLeft;
         $right = $this->paddingRight;
 
-        if ($len < ($left + $right)) {
+        if ($len < $left + $right) {
             return str_repeat($this->aterisk, $this->repeatTimes);
         }
 
